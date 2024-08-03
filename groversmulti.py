@@ -9,7 +9,7 @@ def multivariate_polynomial(n, m):
     variables = symbols(f'x0:{n}')
     polynomials = []
     for _ in range(m):
-        equation = sum(np.random.randint(-10, 10) * variables[i] * variables[j] for i in range(n) for j in range(n))
+        equation = sum(np.random.randint(-5, 5) * variables[i] * variables[j] for i in range(n) for j in range(n))
         polynomials.append(equation)
     return polynomials, variables
 
@@ -47,7 +47,7 @@ def grovers_algorithm(num_qubits, target_state):
     transpiled_circuit = transpile(circuit, backend)
 
     start_time = time.time()
-    result = backend.run(transpiled_circuit, shots=256).result()  # Reduced shots to 256 for faster execution
+    result = backend.run(transpiled_circuit, shots=128).result()  # Reduced shots to 128 for faster execution
     end_time = time.time()
 
     counts = result.get_counts()
@@ -55,8 +55,24 @@ def grovers_algorithm(num_qubits, target_state):
     return counts, time_taken
 
 
-# Example Usage
-polynomials, variables = multivariate_polynomial(3, 2)
+def get_user_input():
+    data = input("Enter a data set (string, list, or complex data structure): ")
+    try:
+        parsed_data = eval(data)
+    except:
+        parsed_data = data
+    return parsed_data
+
+
+# Get data set from user input
+data_set = get_user_input()
+
+# Process the input data set
+if isinstance(data_set, str):
+    polynomials, variables = multivariate_polynomial(2, 1)
+else:
+    polynomials, variables = multivariate_polynomial(3, 2)
+
 solutions = solve_multivariate(polynomials, variables)
 grovers_counts, time_taken = grovers_algorithm(2,
                                                '10')  # Reduced num_qubits to 2 and target_state to '10' for faster execution
@@ -64,8 +80,10 @@ grovers_counts, time_taken = grovers_algorithm(2,
 # Determining if the data was hacked or not
 hacked = any(count > 0 for count in grovers_counts.values())
 
-print("Polynomials:", polynomials)
-print("Solutions:", solutions)
+# Print results
+print(f"Data: {data_set}")
+print(f"Polynomials: {polynomials}")
+print(f"Solutions: {solutions}")
 print("Grover's Algorithm Counts:", grovers_counts)
-print("Hacked:                   ", hacked)
-print("Time taken:               ", time_taken, "seconds")
+print(f"Hacked: {hacked}")
+print(f"Time taken: {time_taken} seconds")
